@@ -70,7 +70,8 @@ class MAGIC_visibility:
 # Visibility plot of the object on a given day. Includes moon and sun altitude.
 	def plot_day(self, date=None):
 		delta_midnight = np.linspace(0, 24, 100)*u.hour
-		BIGB_altazs, moon_alt, sun_alt, moon_dist =  BIGB.day(date)
+		BIGB = SkyCoord(ra=self.ra*u.degree, dec=self.dec*u.degree, frame='icrs')
+		BIGB_altazs, moon_alt, sun_alt, moon_dist =  self.day(date)
 		fig = plt.figure(figsize=(14, 8.4))
 		plt.plot(delta_midnight, moon_alt, color='g', label='Moon')  
 		plt.plot(delta_midnight, sun_alt, color='y', label='Sun')  
@@ -134,47 +135,42 @@ class MAGIC_visibility:
 		sunaltazs = get_sun(times).transform_to(altazframe)
 		# Object's position in it
 		BIGB_altazs = BIGB.transform_to(altazframe)  
-		# Angular distance to the moon
-		x = range(len(BIGB_altazs.alt))
-		moon_dist = [np.arccos(np.sin(moonaltazs[i].alt* np.pi / 180.)*np.sin(BIGB_altazs[i].alt* np.pi / 180.)+ \
-                             np.cos(moonaltazs[i].alt* np.pi / 180.)*np.cos(BIGB_altazs[i].alt* np.pi / 180.)*np.cos(moonaltazs[i].alt* np.pi/180.-BIGB_altazs[i].alt* np.pi / 180.)) for i in x]
-		# Convert to degrees
-		moon_dist=[(180/np.pi)*moon_dist[i] for i in x]
-		return BIGB_altazs, moonaltazs.alt, sunaltazs.alt, moon_dist
+	
+		return BIGB_altazs, moonaltazs, sunaltazs #, moon_dist
 
 # Make the year data into a matrix and plot it as a visibility plot
 	def plot_year(self, date=None):
 		delta_midnight = np.linspace(0,525600,17520)*u.min
 		# Obtain the data from the year function
-		BIGB_altazs, moon_alt, sun.alt, moon_dist =  self.year(date)
+		BIGB_altazs, moonaltazs, sunaltazs=  self.year(date)
 		# Split the data into a matrix of 365 columns and 48 rows (each entry represents half an hour)
 		# First we split the days
-		BIGB_spl = np.split(BIGB_altazs,365)
-		moon_spl = np.split(moon_alt,365)
-		sun_spl = np.split(sun_alt,365)
-		moondist_spl = np.split(moon_dist,365)
+		BIGB_spl = np.split(BIGB_altazs.alt,365)
+		moon_spl = np.split(moonaltazs.alt,365)
+		sun_spl = np.split(sunaltazs.alt,365)
+		#moondist_spl = np.split(moon_dist,365)
 		# Create the empty matrices
 		B_alt=np.zeros((48,365))
 		M_alt=np.zeros((48,365))
 		S_alt=np.zeros((48,365))
-		M_dist=np.zeros((48,365))
+		#M_dist=np.zeros((48,365))
 		# Arrange the altitude data into the matrices
 		for i in range(365):
-	   		 B_alt[:,i]=BIGB_spl[i].alt
+	   		 B_alt[:,i]=BIGB_spl[i]
 	    		 M_alt[:,i]=moon_spl[i]
 			 S_alt[:,i]=sun_spl[i]
-			 M_dist[:,i]=moondist_spl[i]
+			 #M_dist[:,i]=moondist_spl[i]
 		# Mask the entries where the sun is above the horizon (>-18 deg)
 		S1=ma.masked_where(S_alt <= -18, S_alt)
 		# Make the rest zero for the plot (we could also make them zero directly on the object)
 		np.putmask(S1, S1>-20, 0)
 		# Make zero the entries where the moon is below the horizon (dark times)
-		M_dist=ma.masked_where(M_alt<=0, M_dist)
+		#M_dist=ma.masked_where(M_alt<=0, M_dist)
 		fig = plt.figure(figsize=(14,8))
 		plt.imshow(B_alt,origin='lower',cmap=cm.magma, aspect='auto',zorder=0)
 		plt.colorbar().set_label('Altitude [deg]')
-		plt.imshow(d,origin='lower',cmap=cm.binary, aspect='auto',zorder=1)
-		plt.colorbar().set_label('Angular distance to the moon [deg]')
+		#plt.imshow(M_dist,origin='lower',cmap=cm.binary, aspect='auto',zorder=1)
+		#plt.colorbar().set_label('Angular distance to the moon [deg]')
 		plt.imshow(S1,origin='lower', cmap=cm.binary, aspect='auto',zorder=2)
  		#plt.colorbar().set_label('Altitude [deg]')
 		plt.title("Visibility of %s" %self.name)
@@ -187,22 +183,4 @@ class MAGIC_visibility:
 
 
 
-
-
-
-
-
-'''
-BIGB = MAGIC_visibility('BIGBwhatever', 70.66917,61.67750)
-#print(BIGB.ra)
-#print(BIGB.day(date=Time('2016-12-31T00:00:00.00', format='isot', scale='utc')))
-
-#BIGB.plot_day(date=Time('2017-02-01T00:00:00.00', format='isot', scale='utc'))
-start = timeit.default_timer()
-
-BIGB.plot_year(date=Time('2017-02-01T00:00:00.00', format='isot', scale='utc'))
-stop = timeit.default_timer()
-print 'Computational time: '
-print (stop - start)/60., ' mins'
-'''
 
