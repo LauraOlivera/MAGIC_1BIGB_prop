@@ -13,14 +13,15 @@ start = timeit.default_timer()
 #BIGB.plot_year(date=Time('2016-12-31T00:00:00.00', format='isot', scale='utc'))
 #BIGB_alt, BIGB_az, moon_alt, sun_alt, moon_dist   = BIGB.year(date=Time('2016-12-31T00:00:00.00', format='isot', scale='utc'))
 #BIGB_alt, BIGB_az, moon_alt, sun_alt, moon_dist  = BIGB.day(date=Time('2016-12-31T00:00:00.00', format='isot', scale='utc'))
-h=BIGB.visible_hours(date=Time('2017-12-31T00:00:00.00', format='isot', scale='utc'))
+#h=BIGB.visible_hours(date=Time('2017-12-31T00:00:00.00', format='isot', scale='utc'))
+BIGB.hist_visible_hours(date=Time('2017-12-31T00:00:00.00', format='isot', scale='utc'))
 stop = timeit.default_timer()
 print 'Computational time: '
 print (stop - start)/60., ' mins'
 
 #print moon_dist
 #print BIGB_alt
-print h
+#print h
 
 
 
