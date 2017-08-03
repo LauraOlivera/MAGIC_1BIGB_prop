@@ -222,5 +222,23 @@ class MAGIC_visibility:
 		return h
 
 
+# Plot the visible hours histogram of one source
 
+	def hist_visible_hours(self, date=None):	
+		# Obtain the vector of hours 
+		h = self.visible_hours(date=None)
+		fig = plt.figure(figsize=(6,7))
+		index = np.arange(1)
+		bar_width = 0.2
+		opacity = 0.5
+		rects4 = plt.bar(index - bar_width, h[0], bar_width,alpha=opacity, color='r',label='20-28')
+		rects1 = plt.bar(index, h[1], bar_width, alpha=opacity, color='b', label='28-40')
+		rects2 = plt.bar(index + bar_width, h[2], bar_width,  alpha=opacity,color='g', label='40-55')
+		rects3 = plt.bar(index + 2*bar_width, h[3], bar_width, alpha=opacity,  color='y', label='55-85')
+		plt.ylabel('Visible hours')
+		plt.xlabel('BIGB')
+		plt.title("Observable hours of %s" %self.name)
+		plt.xticks(range(1))
+		plt.legend(loc=2, prop={'size': 10})
+		return plt.show()
 
