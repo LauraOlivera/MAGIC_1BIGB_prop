@@ -95,15 +95,16 @@ class MAGIC_visibility:
 		ninety = 90*np.ones((48,365))
 		source_Zd = ninety - source_alt
 		# mask where the sun is above -18 (astronomical sunrise) and moon above the horizon 
-		source_sun_mask = ma.masked_where(sun_alt >= -18, source_Zd)
-		source_moon_mask = ma.masked_where(moon_alt >= 0., source_Zd)
-		source_mask = source_sun_mask + source_moon_mask
+		np.putmask(source_Zd, sun_alt>-18, 0.)
+		np.putmask(source_Zd, moon_alt>0, 0.)
 		
-		return source_mask
+		return source_Zd
 
 
 	def plot_zenith_year(self, Zd_year_matrix):
 		"""plotting the visibility for all the year in terms of zenith"""
+		source_sun_mask = ma.masked_where(Zd_year_matrix == 0., Zd_year_matrix)
+		Zd_year_matrix = ma.masked_where(Zd_year_matrix == 0., source_sun_mask)
 		fig = plt.figure(figsize=(14,8))
 		plt.imshow(Zd_year_matrix, origin='lower', cmap=cm.viridis_r, aspect='auto', interpolation='none',
                    vmin=np.min(Zd_year_matrix), vmax=np.max(Zd_year_matrix))
@@ -140,16 +141,15 @@ class MAGIC_visibility:
 			dictionary with the zenith range (string) and the number of hours the source spend inside
 		"""	
 		h = np.zeros(4)
-		for i in range(48):
-			for j in range(365):
-					if 5 < Zd_year_matrix[i,j] < 35:
-						h[0]+=1
-					elif 35 < Zd_year_matrix[i,j] < 50:
-						h[1]+=1
-					elif 50 < Zd_year_matrix[i,j] < 62:
-						h[2]+=1
-					elif 62 < Zd_year_matrix[i,j] < 70:
-						h[3]+=1
+		for zd in Zd_year_matrix.flatten():
+			if 5 < zd < 35:
+				h[0]+=1
+			if 35 < zd < 50:
+				h[1]+=1
+			if 50 < zd < 62:
+				h[2]+=1
+			if 62 < zd < 70:
+				h[3]+=1
 		h = h/2
 		visible_hours = dict(Zd_05_35=h[0], Zd_35_50=h[1], Zd_50_62=h[2], Zd_62_70=h[3])
 		return visible_hours
