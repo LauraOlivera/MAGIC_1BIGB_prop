@@ -1,5 +1,5 @@
 # MAGIC_1BIGB_prop
-A proposal for observation of 1BIGB with MAGIC
+A proposal for observation of 1BIGB catalog sources with the MAGIC telescopes
 
 ### BIGB_trial_single_night
 Plotting the altitude of an object together with the Sun and Moon.
